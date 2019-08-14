@@ -14,6 +14,15 @@ public class Jogo {
     
     //O primeiro jogador a jogar será o verde;
     private int jogador;
+    
+    //Variável para verificar se o jogador rolou os dados antes de tentar mover uma peça
+    private boolean dadosRolados;
+    
+    //Variável para verificar se os dados rolados possuem o mesmo valor
+    private boolean dadosIguais;
+    
+    //Variável para verificar se os dados rolados possuem o mesmo valor
+    private boolean travarDados;
 
     /**
      * Construtor padrão do Jogo Ludo.
@@ -30,7 +39,9 @@ public class Jogo {
     public Jogo(int numeroDados) {
         this.tabuleiro = new Tabuleiro();
         this.dados = new Dado[numeroDados];
-        this.jogador = 1;
+        jogador = 1;
+        dadosRolados = false;
+        travarDados = false;
         
         for (int i = 0; i < this.dados.length; i++) {
             // remover parâmetro do construtor para dado não batizado
@@ -52,9 +63,6 @@ public class Jogo {
 
         inicializaJogo();
     }
-
-    
-    
     
     private void inicializaJogo() {
 
@@ -68,14 +76,11 @@ public class Jogo {
         // TRECHO DE EXEMPLO
         //
         
-        
         // Vamos inicializar a guarita verde colocando as 4 peças do jogador verde nela.
         //
         // Guarita = espaço onde fica as peças fora do jogo;
         // Consulte a imagem "referencia.png" acompanhada na pasta dessa classe.
         
-        
-
         // Obtemos uma das peças verdes que inicializamos logo acima para usa-la como exemplo.
         // Movemos ela para a casa de inicio do jogador verde.
         Casa casaGuarita;
@@ -104,10 +109,6 @@ public class Jogo {
         peca = new Peca("VERMELHO");
         casaInicio = tabuleiro.getCasaInicio("VERMELHO");
         peca.mover(casaInicio);
-
-        //
-        // TRECHO DE EXEMPLO
-        //
     }
 
     /**
@@ -115,7 +116,6 @@ public class Jogo {
      * Aqui deve-se jogar os dados e fazer todas as verificações necessárias.
      */
     public void rolarDados() {
-        
         // AQUI SE IMPLEMENTARÁ AS REGRAS DO JOGO.
         // TODA VEZ QUE O USUÁRIO CLICAR NO DADO DESENHADO NA INTERFACE GRÁFICA,
         // ESTE MÉTODO SERÁ INVOCADO.
@@ -125,10 +125,16 @@ public class Jogo {
         // TRECHO DE EXEMPLO
         //
         
-        // Aqui percorremos cada dado para lançá-lo individualmente.
+        if(travarDados == false)
+        {
+        // Aqui percorremos cada dado para lançá-lo individualmente.   
         for (Dado dado : dados) {
             dado.rolar();
         }
+        dadosRolados = true;
+        dadosIguais = verificaDadosIguais();  
+        }
+        travarDados = true;
     }
     
     /**
@@ -164,49 +170,56 @@ public class Jogo {
         
         // Percorreremos N casas.
         Casa proximaCasa = casa;
-        if(jogadorDaVez(jogador) == peca.obterCor())
+        if(jogadorDaVez(jogador) == peca.obterCor() &&dadosRolados == true)
         {
-        if(proximaCasa.getCasaSegura() != null && peca.obterCor() != proximaCasa.getCor())
-        {
-           Casa teste = proximaCasa.getCasaSegura();
-           if(teste.getCor() == peca.obterCor())
-           {
-             for (int i = 0; i < somaDados && proximaCasa!= null; i++) 
-             {
-                 proximaCasa = proximaCasa.getCasaSegura();
-                 proximaCasa.setCasaSegura(proximaCasa);
-                } 
-           }
-           else
-           {
-             for (int i = 0; i < somaDados && proximaCasa != null; i++) 
-             {
-                 proximaCasa = proximaCasa.getCasaSeguinte();
-             } 
-           }
-
-        }
-        else if(proximaCasa.getCasaSegura() != null && peca.obterCor() == casa.getCor())
-        {
-           for (int i = 0; i < somaDados && proximaCasa!= null; i++) 
-           {
-            proximaCasa = proximaCasa.getCasaSeguinte();
-           }
-        }
-        else
-        {
-            for (int i = 0; i < somaDados && proximaCasa != null; i++) 
+            if(proximaCasa.getCasaSegura() != null && peca.obterCor() != proximaCasa.getCor())
             {
-             proximaCasa = proximaCasa.getCasaSeguinte();
-            }  
-        }
-            if(jogador == 4)
+                Casa teste = proximaCasa.getCasaSegura();
+                if(teste.getCor() == peca.obterCor())
+                {
+                    for (int i = 0; i < somaDados && proximaCasa!= null; i++) 
+                    {
+                        proximaCasa = proximaCasa.getCasaSegura();
+                        proximaCasa.setCasaSegura(proximaCasa);
+                    } 
+                }
+                else
+                {
+                    for (int i = 0; i < somaDados && proximaCasa != null; i++) 
+                    {
+                        proximaCasa = proximaCasa.getCasaSeguinte();
+                    }    
+                }
+            }
+            else if(proximaCasa.getCasaSegura() != null && peca.obterCor() == casa.getCor())
             {
-                jogador = 1;
+                for (int i = 0; i < somaDados && proximaCasa!= null; i++) 
+                {
+                    proximaCasa = proximaCasa.getCasaSeguinte();
+                }
             }
             else
             {
-                jogador++;
+                for (int i = 0; i < somaDados && proximaCasa != null; i++) 
+                {
+                    proximaCasa = proximaCasa.getCasaSeguinte();
+                }  
+            }
+            if(jogador == 4)
+            {
+                if(dadosIguais != true){
+                    jogador = 1;                    
+                }
+                dadosRolados = false;
+                travarDados = false;
+            }
+            else
+            {
+                if(dadosIguais != true){
+                    jogador++;
+                }
+                dadosRolados = false;
+                travarDados = false;
             }
         }
         
@@ -297,6 +310,10 @@ public class Jogo {
         }
     }
     
+     /**
+     * Retorna o jogador que deve jogar os dados ou escolher uma peça.
+     * @return Cor do jogador.
+     */
     public String jogadorDaVez(int nJogador)
     {
         String jogadorDaVez= " ";
@@ -317,5 +334,26 @@ public class Jogo {
             jogadorDaVez = "AMARELO";
         }
         return jogadorDaVez;
+    }
+    
+    /**
+     * Teste se os dados jogados possuem o mesmo valor, caso seja verdeiro: true, falso: false.
+     * @return Cor do jogador.
+     */
+    public boolean verificaDadosIguais()
+    {
+        int valorDado[] = new int[2];                
+        for (int i = 0; i <=1; i++)
+        {
+            valorDado[i] = dados[i].getValor();
+        }
+        
+        if(valorDado[0] == valorDado[1]){
+            return true;
+        }
+        else{
+           return false; 
+        }
+        
     }
 }
