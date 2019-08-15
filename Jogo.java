@@ -21,7 +21,7 @@ public class Jogo {
     //Variável para verificar se os dados rolados possuem o mesmo valor
     private boolean dadosIguais;
     
-    //Variável para verificar se os dados rolados possuem o mesmo valor
+    //Variável serve para impedir que os dados possam ser rolados antes de mover uma peça
     private boolean travarDados;
 
     /**
@@ -170,7 +170,7 @@ public class Jogo {
         
         // Percorreremos N casas.
         Casa proximaCasa = casa;
-        if(jogadorDaVez(jogador) == peca.obterCor() &&dadosRolados == true)
+        if(jogadorDaVez(jogador) == peca.obterCor() && dadosRolados == true)
         {
             if(proximaCasa.getCasaSegura() != null && peca.obterCor() != proximaCasa.getCor())
             {
@@ -205,22 +205,7 @@ public class Jogo {
                     proximaCasa = proximaCasa.getCasaSeguinte();
                 }  
             }
-            if(jogador == 4)
-            {
-                if(dadosIguais != true){
-                    jogador = 1;                    
-                }
-                dadosRolados = false;
-                travarDados = false;
-            }
-            else
-            {
-                if(dadosIguais != true){
-                    jogador++;
-                }
-                dadosRolados = false;
-                travarDados = false;
-            }
+            proximoAJogar();
         }
         
       
@@ -246,6 +231,7 @@ public class Jogo {
      * @return Cor do jogador.
      */
     public String getJogadorDaVez() {
+        //pode ser que jogadorDaVez(jogador) funcione no lugar desse null, testar.
         return null;
     }
     
@@ -355,5 +341,27 @@ public class Jogo {
            return false; 
         }
         
+    }
+    
+     /**
+     * Teste se os dados jogados possuem o mesmo valor, caso seja verdeiro: true, falso: false.
+     * @return Cor do jogador.
+     */
+    public void proximoAJogar()
+    {
+        if(jogador == 4)
+        {
+            if(dadosIguais != true){
+                jogador = 1;                    
+            }
+        }
+        else
+        {
+            if(dadosIguais != true){
+                jogador++;
+            }
+        }
+        dadosRolados = false;
+        travarDados = false;
     }
 }
